@@ -16,7 +16,9 @@ while True:
         break
     mouse_pos = pygame.mouse.get_pos()
     
-    # fill the screen with the selected color. In python, this one is called 'method', the data having method are called 'objects'
+    # fill the screen with the selected color. 
+    # In python, this one is called 'method', 
+    # the data having method are called 'objects'
     screen.fill(pygame.Color("black"))
     #method to paste image to the mouse position
     screen.blit(player_img, mouse_pos)
