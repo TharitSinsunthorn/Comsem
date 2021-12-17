@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 screen = pygame.display.set_mode((600, 400))
 font = pygame.font.Font(None, 50)
-text_img = font.render("Hello, pygame", True, pygame.Color("yellow"))
+text_img = font.render("Hello, pygame", True, pygame.Color("red"))
 
 while True:
     pygame.event.clear()
