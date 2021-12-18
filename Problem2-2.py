@@ -24,10 +24,10 @@ while True:
     screen.blit(player_img, mouse_pos)
     mouse_x, mouse_y = mouse_pos
     screen.blit(text_img, (mouse_x + 100, mouse_y))
-    pygame.draw.line(screen, pygame.Color("blue"), mouse_pos, [mouse_x + 500, mouse_y], 4)
-    pygame.draw.line(screen, pygame.Color("blue"), mouse_pos, [mouse_x - 500, mouse_y], 4)
-    pygame.draw.line(screen, pygame.Color("blue"), mouse_pos, [mouse_x, mouse_y + 500], 4)
-    pygame.draw.line(screen, pygame.Color("blue"), mouse_pos, [mouse_x, mouse_y - 500], 4)
+    pygame.draw.line(screen, pygame.Color("blue"), mouse_pos, [mouse_x + 600, mouse_y], 4)
+    pygame.draw.line(screen, pygame.Color("blue"), mouse_pos, [mouse_x - 600, mouse_y], 4)
+    pygame.draw.line(screen, pygame.Color("blue"), mouse_pos, [mouse_x, mouse_y + 400], 4)
+    pygame.draw.line(screen, pygame.Color("blue"), mouse_pos, [mouse_x, mouse_y - 400], 4)
     pygame.draw.ellipse(screen, pygame.Color("red"), [mouse_x + 80, mouse_y, 270 , 40], 2)
     pygame.display.update()
     

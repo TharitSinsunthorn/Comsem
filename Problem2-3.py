@@ -27,5 +27,5 @@ while True:
     # For red circle
     # pygame.draw.circle(screen, pygame.Color("red"), pygame.mouse.get_pos(), 30)
     pygame.display.update()
-    
+
 pygame.quit()
