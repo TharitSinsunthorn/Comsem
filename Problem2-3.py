@@ -1,3 +1,4 @@
+# C0TB1716 Tharit Sinsunthorn
 import pygame
 
 pygame.init()
@@ -24,8 +25,6 @@ while True:
     
     screen.blit(player_img, [mouse_x - Pwidth/2, mouse_y - Pheight/2])
     screen.blit(text_img, (mouse_x + 100 - Pwidth/2, mouse_y - Pheight/2))
-    # For red circle
-    # pygame.draw.circle(screen, pygame.Color("red"), pygame.mouse.get_pos(), 30)
     pygame.display.update()
     
 pygame.quit()

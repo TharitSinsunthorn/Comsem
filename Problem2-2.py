@@ -1,3 +1,4 @@
+# C0TB1716 Tharit Sinsunthorn
 import pygame
 
 pygame.init()
@@ -20,6 +21,7 @@ while True:
     # In python, this one is called 'method'
     # the data having method are called 'objects'
     screen.fill(pygame.Color("black"))
+    
     #method to paste image to the mouse position
     screen.blit(player_img, mouse_pos)
     mouse_x, mouse_y = mouse_pos
