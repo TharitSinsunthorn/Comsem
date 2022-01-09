@@ -1,2 +1,4 @@
-print("hi world")
-print("yeah wow")
+# print("hi world")
+# print("yeah wow")
+print(2 + 3)
+print(bool(1))

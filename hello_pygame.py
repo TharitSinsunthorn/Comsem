@@ -1,9 +1,13 @@
 import pygame
 
 pygame.init()
-screen = pygame.display.set_mode((600, 400))
-font = pygame.font.Font(None, 50)
-text_img = font.render("Hello, pygame", True, pygame.Color("green"))
+width, height = 600, 400
+screen = pygame.display.set_mode((width, height))
+font_size = 50
+font_file = None
+antialias = True
+font = pygame.font.Font(font_file, font_size)
+text_img = font.render("Hello, pygame", antialias, pygame.Color("green"))
 
 # For image mouse
 img_org = pygame.image.load("../../assets/player/p1_walk01.png")
