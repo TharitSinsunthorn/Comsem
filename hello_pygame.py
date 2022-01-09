@@ -15,12 +15,9 @@ def create_text():
     return text_img
 
 def create_player():
-    player_images = [
-        pygame.image.load("../../assets/player/p1_walk04.png").convert(),
-        pygame.image.load("../../assets/player/p1_walk05.png").convert(),
-        pygame.image.load("../../assets/player/p1_walk06.png").convert(),
-        pygame.image.load("../../assets/player/p1_walk07.png").convert()
-    ]
+    file_path = "../../assets/player/p1_walk{:02}.png"
+    player_images = []
+    player_images = [pygame.image.load(file_path.format(k)).convert() for k in range(4, 8)]
     return player_images
     
 def draw(screen, player_img, text_img, mouse_pos):
