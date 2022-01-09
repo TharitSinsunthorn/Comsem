@@ -23,9 +23,10 @@ def create_player():
 def draw(screen, player_img, text_img, mouse_pos):
     screen.fill(pygame.Color("black"))
     screen.blit(player_img, mouse_pos)
-    mouse_x, mouse_y = mouse_pos
-    text_offset_x = 100
-    screen.blit(text_img, (mouse_x + text_offset_x, mouse_y))
+    if text_img is not None:
+        mouse_x, mouse_y = mouse_pos
+        text_offset_x = 100
+        screen.blit(text_img, (mouse_x + text_offset_x, mouse_y))
     pygame.display.update()
 
 def main():
@@ -51,11 +52,16 @@ def main():
         if should_quit:
             break
         mouse_pos = pygame.mouse.get_pos()
-        
+        buttons_pressed = pygame.mouse.get_pressed()
+        if buttons_pressed[0]:
+            text_img_shown = text_img
+        else:
+            text_img_shown = None
+            
         frame_index += 1
         animation_period = 6 #This come from trial and error
         animation_index = (frame_index // animation_period % len(player_img))
-        draw(screen, player_img[animation_index], text_img, mouse_pos)
+        draw(screen, player_img[animation_index], text_img_shown, mouse_pos)
         
     pygame.quit()
     
