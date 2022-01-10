@@ -1,9 +1,7 @@
-import pygame
-print("hello")
-x = -10
-if x < 0:
-    print("x is negative")
+x = [0,0,0]
+x.clear()
 print(x)
-
-mouse_pos = pygame.mouse.get_pos()
-print(mouse_pos[0])
+x.append(0)
+x = x*3
+print(x)
+assert x == [0,0,0]
