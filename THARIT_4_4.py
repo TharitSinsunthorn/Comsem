@@ -77,5 +77,6 @@ def main():
         draw(screen, player_img[animation_index], text_img_shown, mouse_pos)
     pygame.quit()
     
-main()
+if __name__ == "__main__":
+    main()
 

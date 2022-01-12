@@ -71,11 +71,12 @@ def main():
         rel_x, rel_y = pygame.mouse.get_rel()
         rel_dis = math.sqrt(rel_x**2 + rel_y**2)
         frame_index += round(rel_dis)
-        animation_period = 20 #This come from trial and error
+        animation_period = 15 #This come from trial and error
         animation_index = (frame_index // animation_period % len(player_img))
         draw(screen, player_img[animation_index], text_img_shown, mouse_pos)
         
     pygame.quit()
     
-main()
+if __name__ == "__main__":
+    main()
 
