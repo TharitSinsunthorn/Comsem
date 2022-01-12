@@ -1,17 +1,25 @@
 import pygame
 import random
 
+class World:
+    def __init__(self, width, height, dt, gy):
+        self.width = width
+        self.height = height
+        self.dt = dt
+        self.gy = gy
+
 class Particle:
-    def __init__(self, pos, vel):
+    def __init__(self, pos, vel, world):
         self.is_alive = True
         self.x, self.y = pos
         self.vx, self.vy = vel
+        self.world = world
         
-    def update(self, width, height, dt, gy):
-        self.vy += gy * dt
-        self.x += self.vx * dt
-        self.y += self.vy * dt
-        if self.x < 0 or self.x > width or self.y > height:
+    def update(self):
+        self.vy += self.world.gy * self.world.dt
+        self.x += self.vx * self.world.dt
+        self.y += self.vy * self.world.dt
+        if self.x < 0 or self.x > self.world.width or self.y > self.world.height:
             self.is_alive = False
             
     def draw(self, screen):
@@ -24,8 +32,7 @@ def main():
     screen = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
     
-    dt = 1.0
-    gy = 0.5
+    world = World(width, height, dt=1.0, gy=0.5)
     particle_list = []
     
     while True:
@@ -44,13 +51,13 @@ def main():
                     
                     vx = random.uniform(-10, 10)
                     vy = random.uniform(-10, 0)
-                    p = Particle(event.pos, (vx, vy))
+                    p = Particle(event.pos, (vx, vy), world)
                     particle_list.append(p)
         if should_quit:
             break
         
         for p in particle_list:
-            p.update(width, height, dt, gy)
+            p.update()
         
         particle_list[:] = {p for p in particle_list if p.is_alive}
         
