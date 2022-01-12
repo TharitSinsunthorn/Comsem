@@ -4,6 +4,22 @@ import random
 class Particle:
     pass
 
+def init_particle(p, pos, vel):
+    p.is_alive = True
+    p.x, p.y = pos
+    p.vx, p.vy = vel
+    
+def update_particle(p, width, height, dt, gy):
+    p.vy += gy * dt
+    p.x += p.vx * dt
+    p.y += p.vy * dt
+    if p.x < 0 or p.x > width or p.y > height:
+        p.is_alive = False
+        
+def draw_particle(p, screen):
+    radius = 10
+    pygame.draw.circle(screen, pygame.Color("green"), (p.x, p.y), radius)
+    
 def main():
     pygame.init()
     width, height = 600, 400
@@ -33,27 +49,21 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     p = Particle()
-                    p.is_alive = True
-                    p.x, p.y = event.pos
-                    p.vx = random.uniform(-10, 10)
-                    p.vy = random.uniform(-10, 0)
+                    vx = random.uniform(-10, 10)
+                    vy = random.uniform(-10, 0)
+                    init_particle(p, event.pos, (vx, vy))
                     particle_list.append(p)
         if should_quit:
             break
         
         for p in particle_list:
-            p.vy += gy * dt
-            p.x += p.vx * dt
-            p.y += p.vy * dt
-            if p.x < 0 or p.x > width or p.y > height:
-                p.is_alive = False
+            update_particle(p, width, height, dt, gy)
         
         particle_list[:] = {p for p in particle_list if p.is_alive}
         
         screen.fill(pygame.Color("black"))
         for p in particle_list:
-            radius = 10
-            pygame.draw.circle(screen, pygame.Color("green"), (p.x, p.y), radius)
+            draw_particle(p, screen)
         pygame.display.update()
         
     pygame.quit()

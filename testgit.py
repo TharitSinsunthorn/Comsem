@@ -1,47 +1,40 @@
 import pygame
-import math
+import random
 
-def init_screen():
+class Particle:
+    pass
+
+def init_particle(p, pos, vel):
+    p.is_alive = True
+    p.x, p.y = pos
+    p.vx, p.vy = vel
+    
+def update_particle(p, width, height, dt, gy):
+    p.vy += gy * dt
+    p.x += p.vx * dt
+    p.y += p.vy * dt
+    if p.x < 0 or p.x > width or p.y > height:
+        p.is_alive = False
+        
+def draw_particle(p, screen):
+    radius = 10
+    pygame.draw.circle(screen, pygame.Color("green"), (p.x, p.y), radius)
+    
+def main():
     pygame.init()
     width, height = 600, 400
     screen = pygame.display.set_mode((width, height))
-    return screen
-
-def create_text():
-    font_size = 50
-    font_file = None
-    antialias = True
-    font = pygame.font.Font(font_file, font_size)
-    text_img1 = font.render("MANAO", antialias, pygame.Color("red"))
-    text_img2 = font.render("MA", antialias, pygame.Color("green"))
-    text_img3 = font.render("NA", antialias, pygame.Color("blue"))
-    text_img  = [text_img1, text_img2, text_img3]
-    return text_img
-
-def create_player():
-    file_path = "../../assets/player/p1_walk{:02}.png"
-    player_images = []
-    player_images = [pygame.image.load(file_path.format(k)).convert() for k in range(4, 8)]
-    return player_images
-    
-def draw(screen, player_img, text_img, mouse_pos):
-    screen.fill(pygame.Color("black"))
-    screen.blit(player_img, mouse_pos)
-    if text_img is not None:
-        mouse_x, mouse_y = mouse_pos
-        text_offset_x = 100
-        screen.blit(text_img, (mouse_x + text_offset_x, mouse_y))
-    pygame.display.update()
-
-def main():
-    screen = init_screen()
-    text_img = create_text()
-    player_img = create_player()
     clock = pygame.time.Clock()
-    frame_index = 0
-    clicknum = 0
-
-
+    
+    dt = 1.0
+    gy = 0.5
+    particle_list = []
+    p = Particle()
+    p.is_alive_ =  False
+    p.x, p.y = 0, 0
+    p.vx, p.vy = 0, 0
+    particle_is_alive = False
+    
     while True:
         frames_per_second = 60
         clock.tick(frames_per_second)
@@ -53,27 +46,25 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     should_quit = True
-                elif event.key == pygame.K_b:
-                    pass
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                clicknum += 1
+                if event.button == 1:
+                    p = Particle()
+                    vx = random.uniform(-10, 10)
+                    vy = random.uniform(-10, 0)
+                    init_particle(p, event.pos, (vx, vy))
+                    particle_list.append(p)
         if should_quit:
             break
-                    
-        text_index = clicknum % len(text_img)
-        mouse_pos = pygame.mouse.get_pos()
-        buttons_pressed = pygame.mouse.get_pressed()
-        if buttons_pressed[0]:
-            text_img_shown = text_img[text_index]
-        else:
-            text_img_shown = None
         
-        rel_x, rel_y = pygame.mouse.get_rel()
-        rel_dis = math.sqrt(rel_x**2 + rel_y**2)
-        frame_index += round(rel_dis)
-        animation_period = 15 #This come from trial and error
-        animation_index = (frame_index // animation_period % len(player_img))
-        draw(screen, player_img[animation_index], text_img_shown, mouse_pos)
+        for p in particle_list:
+            update_particle(p, width, height, dt, gy)
+        
+        particle_list[:] = {p for p in particle_list if p.is_alive}
+        
+        screen.fill(pygame.Color("black"))
+        for p in particle_list:
+            draw_particle(p, screen)
+        pygame.display.update()
         
     pygame.quit()
     
