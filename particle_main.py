@@ -26,7 +26,7 @@ class AppMain:
         if button == 1:
             vx = random.uniform(-10, 10)
             vy = random.uniform(-10, 0)
-            p = particle.Particle(pos, (vx, vy), self.world)
+            p = particle.ConfinedParticle(pos, (vx, vy), self.world)
             self.particle_list.append(p)
 
     def run(self):
