@@ -40,8 +40,14 @@ class Particle:
     
 class ConfinedParticle(Particle):
     def update_after_move(self):
+        x, y = self.x, self.y
+        vx, vy = self.vel.x, self.vel.y
+        width, height = self.world.width, self.world.height
+        radius = self.radius
         e = 0.95
-        if self.pos.x < 0 + self.radius or self.pos.x > self.world.width - self.radius:
+        if (x < 0 + radius and vx < 0) or (x > width - radius and vx > 0):
             self.vel.x *= -e
-        if self.pos.y > self.world.height - self.radius:
+        if y > height - radius and vy > 0:
             self.vel.y *= -e
+            # constrain particle on or above the floor
+            self.pos.y = height - radius
