@@ -10,11 +10,13 @@ class World:
         self.gy = gy
 
 class Particle:
-    def __init__(self, pos, vel, world):
+    def __init__(self, pos, vel, world, radius=10, color="green"):
         self.is_alive = True
         self.x, self.y = pos
         self.vx, self.vy = vel
         self.world = world
+        self.radius= radius
+        self.color = pygame.Color(color)
         
     def update(self):
         self.vy += self.world.gy * self.world.dt
@@ -24,8 +26,7 @@ class Particle:
             self.is_alive = False
             
     def draw(self, screen):
-        radius = 10
-        pygame.draw.circle(screen, pygame.Color("green"), (self.x, self.y), radius)
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
     
 class AppMain:
     def __init__(self):
@@ -50,7 +51,9 @@ class AppMain:
         if button == 1:
             vx = random.uniform(-10, 10)
             vy = random.uniform(-10, 0)
-            p = Particle(pos, (vx, vy), self.world)
+            rr = random.uniform(5,15)
+            color_list = ["red", "green", "blue"]
+            p = Particle(pos, (vx, vy), self.world, radius=rr, color = random.choice(color_list))
             self.particle_list.append(p)
 
     def run(self):
