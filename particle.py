@@ -55,7 +55,17 @@ class AppMain:
             color_list = ["red", "green", "blue"]
             p = Particle(pos, (vx, vy), self.world, radius=rr, color = random.choice(color_list))
             self.particle_list.append(p)
-
+            
+    def add_multiple_particles(self, pos, button):
+        if button == 3:
+            for _ in range(random.randint(2,5)):
+                vx = random.uniform(-10, 10)
+                vy = random.uniform(-10, 0)
+                rr = random.uniform(5,15)
+                color_list = ["red", "green", "blue"]
+                p = Particle(pos, (vx, vy), self.world, radius=rr, color = random.choice(color_list))
+                self.particle_list.append(p)
+            
     def run(self):
         clock = pygame.time.Clock()
 
@@ -72,6 +82,7 @@ class AppMain:
                         should_quit = True
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.add_particle(event.pos, event.button)
+                    self.add_multiple_particles(event.pos, event.button)
             if should_quit:
                 break
 
