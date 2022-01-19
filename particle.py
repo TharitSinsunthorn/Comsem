@@ -47,10 +47,10 @@ class AppMain:
             p.draw(self.screen)
         pygame.display.update()
 
-    def add_particle(self, pos, button):
+    def add_particle(self, pos, v, button):
         if button == 1:
-            vx = random.uniform(-10, 10)
-            vy = random.uniform(-10, 0)
+            vx = v[0]
+            vy = v[1]
             rr = random.uniform(5,15)
             color_list = ["red", "green", "blue"]
             p = Particle(pos, (vx, vy), self.world, radius=rr, color = random.choice(color_list))
@@ -81,7 +81,9 @@ class AppMain:
                     if event.key == pygame.K_ESCAPE:
                         should_quit = True
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    self.add_particle(event.pos, event.button)
+                    x,y = event.pos
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    self.add_particle(event.pos, (-(event.pos[0]-x)/5, -(event.pos[1]-y)/5), event.button)
                     self.add_multiple_particles(event.pos, event.button)
             if should_quit:
                 break
