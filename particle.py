@@ -1,17 +1,21 @@
 import pygame
 
-def bounce_on_boundary(p):
-    x, y = p.x, p.y
-    vx, vy = p.vel.x, p.vel.y
-    width, height = p.world.width, p.world.height
-    radius = p.radius
-    e = 0.95
-    if (x < 0 + radius and vx < 0) or (x > width - radius and vx > 0):
-        p.vel.x *= -e
-    if y > height - radius and vy > 0:
-        p.vel.y *= -e
-        # constrain particle on or above the floor
-        p.pos.y = height - radius
+class BounceOnBoundaryStrategy:
+    def __init__(self, restitution=0.95):
+        self.restitution = restitution
+
+    def __call__(self, p):
+        x, y = p.x, p.y
+        vx, vy = p.vel.x, p.vel.y
+        width, height = p.world.width, p.world.height
+        radius = p.radius
+        e = self.restitution
+        if (x < 0 + radius and vx < 0) or (x > width - radius and vx > 0):
+            p.vel.x *= -e
+        if y > height - radius and vy > 0:
+            p.vel.y *= -e
+            # constrain particle on or above the floor
+            p.pos.y = height - radius
         
 class World:
     def __init__(self, width, height, dt, gy):
