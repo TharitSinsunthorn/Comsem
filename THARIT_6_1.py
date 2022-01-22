@@ -1,30 +1,25 @@
 import pygame
-import random
 
 class BounceOnBoundaryStrategy:
     def __init__(self, restitution=0.95):
         self.restitution = restitution
-        
+        self.b = 0
     def __call__(self, p):
         x, y = p.x, p.y
         vx, vy = p.vel.x, p.vel.y
         width, height = p.world.width, p.world.height
         radius = p.radius
-        color_list = ["red", "green", "blue", "yellow", "pink"]
         e = self.restitution
-        
-        if (x < 0 + radius and vx < 0) or (x > width - radius and vx > 0):
-            p.vel.x *= -e
-            p.radius = random.uniform(5,20)
-            p.color = random.choice(color_list)
-            
-        if y > height - radius and vy > 0:
-            p.vel.y *= -e
-            # constrain particle on or above the floor
-            p.pos.y = height - radius
-            p.radius = random.uniform(5,20)
-            p.color = random.choice(color_list)
-            
+        if self.b < 4:
+            if (x < 0 + radius and vx < 0) or (x > width - radius and vx > 0):
+                p.vel.x *= -e
+                self.b += 1
+                
+            if y > height - radius and vy > 0:
+                p.vel.y *= -e
+                # constrain particle on or above the floor
+                p.pos.y = height - radius
+                self.b += 1
         else:
             pass
         
