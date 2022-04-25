@@ -20,7 +20,7 @@ def create_text():
 def create_player():
     file_path = "../../assets/player/p1_walk{:02}.png"
     player_images = []
-    player_images = [pygame.image.load(file_path.format(k)).convert() for k in range(4, 8)]
+    player_images = [pygame.image.load(file_path.format(k)).convert() for k in range(2, 8)]
     return player_images
     
 def draw(screen, player_img, text_img, mouse_pos):
@@ -72,7 +72,7 @@ def main():
         else:
             frame_index += 1 
             
-        animation_period = 6 #This come from trial and error
+        animation_period = 10 #This come from trial and error
         animation_index = (frame_index // animation_period % len(player_img))
         draw(screen, player_img[animation_index], text_img_shown, mouse_pos)
     pygame.quit()
