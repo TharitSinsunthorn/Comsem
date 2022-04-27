@@ -72,6 +72,7 @@ def main():
         animation_period = 3 #This come from trial and error
         animation_index = (frame_index // animation_period % len(player_img))
         draw(screen, player_img[animation_index], (player_pos, 500))
+        pygame.draw.circle(screen, "green", (250,500, 70, self.width)
     pygame.quit()
     
 if __name__ == "__main__":

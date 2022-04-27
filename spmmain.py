@@ -9,7 +9,8 @@ class ActorFactory:
         self.actor_list = actor_list
 
     def create_point_mass(self, pos, fixed=False):
-        vel = (random.uniform(-10, 10), random.uniform(-10, 0))
+        # vel = (random.uniform(-10, 10), random.uniform(-10, 0))
+        vel = (0,0)
         mass = 10
         radius = 10
         viscous = 0.01
@@ -91,7 +92,7 @@ class AppMain:
     def draw(self, screen, player_img, player_pos):
         self.screen.fill(pygame.Color("black"))
         self.screen.blit(player_img, (player_pos, 500))
-        pygame.draw.rect(screen, "white", pygame.Rect(player_pos, 495, 75, 10))
+        pygame.draw.circle(screen, "green", (player_pos+39, 533), 34)
         for a in self.actor_list:
             a.draw(self.screen)
         pygame.display.update()

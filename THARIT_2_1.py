@@ -2,9 +2,12 @@
 import pygame
 
 pygame.init()
-screen = pygame.display.set_mode((600, 700))
-font = pygame.font.Font(None, 50)
-text_img = font.render("hello, pygame", True, pygame.Color("yellow"))
+screen = pygame.display.set_mode((1000, 1000))
+font = pygame.font.Font(None, 100)
+text_img = font.render("TOWER TAKE A SHOWER", True, pygame.Color("cyan"))
+
+
+    
 
 while True:
     pygame.event.clear()
