@@ -60,7 +60,7 @@ class ActorFactory:
         mass = 10
         radius = 10
         viscous = 0.01
-        restitution = 0.95 
+        restitution = 1.05
         # if fixed:
         #     color = "gray"
         #     return spm.FixedPointMass(pos,  self.world, radius, viscous,
@@ -75,6 +75,10 @@ class ActorFactory:
     #     natural_len = 20
     #     return spm.Spring(p1, p2, self.world, spring_const, natural_len,
     #                       spm.LineDrawer("white", width=2))
+    
+    def create_gfield(self, p1, p2):
+        G = -20
+        return spm.Blackhole(p1, p2, self.world, G, spm.LineDrawer("white", width=1))
         
     def create_collision_resolver(self):
         return spm.countedCollisionResolver(self.world, self.actor_list)
@@ -94,6 +98,7 @@ class AppMain:
         pygame.init()
         width, height = 600, 700
         pygame.display.set_caption("Charlee Charlee")
+        self.game_over = False
         self.screen = pygame.display.set_mode((width, height))
 
         self.world = spm.World((width, height), dt=1.0, gravity_acc=(0, 0.1))
@@ -125,6 +130,14 @@ class AppMain:
         p = self.factory.create_point_mass((300, 0), (random.uniform(-10, 10), random.uniform(-10, 0)))
         self.actor_list.append(p)
 
+        h1 = self.factory.create_obstacle()[9]
+        h2 = self.factory.create_obstacle()[14]
+        gf1 = self.factory.create_gfield(p, h1)
+        # gf2 = self.factory.create_gfield(p, h2)
+        
+        self.actor_list.append(gf1)
+        # self.actor_list.append(gf2)
+    
         # if self.point_mass_prev is not None:
         #     sp = self.factory.create_spring(p, self.point_mass_prev)
         #     self.actor_list.append(sp)
@@ -137,50 +150,93 @@ class AppMain:
         self.actor_list[:] = [a for a in self.actor_list if a.is_alive]
 
 
-    def draw(self, animation_index,player_pos):
-        self.screen.fill(pygame.Color("black"))
+    def draw(self, animation_index,player_pos, game_over):
+        self.screen.fill(pygame.Color("cyan"))
         self.player.move_player(animation_index, spm.PgVector((player_pos, 633)))
+            
         for a in self.actor_list:
             a.draw(self.screen)
-        pygame.display.update()
+        font = pygame.font.Font(None, 90)
+        if game_over == True:
+            text_img = font.render("GAME OVER", True, pygame.Color("white"))
+            text_rect = text_img.get_rect(center=(600/2, 700/2))
+            self.screen.blit(text_img, text_rect)
+        else:
+            return None
+            
+        # pygame.display.update()
+        
+    def startscreen(self):
+        font = pygame.font.Font(None, 90)
+        text_img = font.render("Press", True, pygame.Color("white"))
+        text_rect = text_img.get_rect(center=(600/2, 700/2))
+        self.screen.blit(text_img, text_rect)
+        
+        pygame.display.flip()
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                if event.type == pygame.K_SPACE:
+                    waiting = False
 
     def run(self):
         clock = pygame.time.Clock()
         player_img = self.player.get_player_images()
-        
         
         frame_index = 0
         player_pos = 300
         walk = False
         player_move = 0
 
-        while True:
+        should_quit = False
+        game_over = False
+        running = True
+        life = True
+        while running:
+            # if game_over:
+            #     self.startscreen()
+            #     game_over = False
+            #     self.run()
+                
             frames_per_second = 60
             clock.tick(frames_per_second)
-            
-
-            should_quit = False
+            for i in self.actor_list:
+                if type(i) is spm.PointMass and i.pos.y > 710:
+                    game_over = True
+                
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     should_quit = True
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     should_quit = True
-                # elif event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-                #     self.point_mass_prev = None
-                # elif event.type == pygame.MOUSEBUTTONDOWN:
-                #     sling_x, sling_y = event.pos
-                #     tip1 = (player_pos, 550)
-                #     tip2 = (-(event.pos[0] - sling_x ), -(event.pos[1] - sling_y))
-                #     # for k in range(1,11):
+                    # elif event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
+                    #     self.point_mass_prev = None
+                    # elif event.type == pygame.MOUSEBUTTONDOWN:
+                    #     sling_x, sling_y = event.pos
+                    #     tip1 = (player_pos, 550)
+                    #     tip2 = (-(event.pos[0] - sling_x ), -(event.pos[1] - sling_y))
+                    #     # for k in range(1,11):
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_r and game_over:
+                    print("restart")
+                    # running = False
+                    # self.actor_list.clear()
+                    self.actor_list.remove(spm.countedCollisionResolver(self.world, self.actor_list)
+)
+                    # self.actor_list.append(self.factory.create_collision_resolver())
+                    self.run()
                     
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                        
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and life:
                     self.add_connected_point_mass()
-                
+                    life = False
+                    
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
                         player_move = -7
                         walk = True
-                        
+                            
                     elif event.key == pygame.K_d:
                         player_move = 7
                         walk = True
@@ -188,28 +244,42 @@ class AppMain:
                     if event.key == pygame.K_a or event.key == pygame.K_d:
                         player_move = 0
                         walk = False
+                            
             if should_quit:
                 break
-            
+                
             player_pos += player_move
             if player_pos <= 90:
-                player_pos = 90
+                    player_pos = 90
             elif player_pos >= 510:
                 player_pos = 510
-            
+                
             if walk == True:
                 frame_index += 1
             else:
                 frame_index = 0
-            
+                
             animation_period = 3 #This come from trial and error
             animation_index = (frame_index // animation_period % len(player_img))
 
             self.update()
-            self.draw(animation_index, player_pos)
-
+            self.draw(animation_index, player_pos, game_over)
+            pygame.display.update()
+            
         pygame.quit()
+
 
 
 if __name__ == "__main__":
     AppMain().run()
+    
+# play_again = 1
+
+# while play_again:
+#     # play_again = int(input("Play again? 0=No, 1=Yes"))
+#     if play_again:
+#         if __name__ == "__main__":
+#             AppMain().run()
+#     else:
+#         break
+#         pygame.quit()
