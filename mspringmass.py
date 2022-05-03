@@ -99,6 +99,8 @@ class PointMass:
                 # constrain y on or above floor
                 self.pos.y = msg["y"] - self.radius
 
+    def restart(self):
+        pass
 
 class FixedPointMass(PointMass):
     def __init__(self, pos, world, radius=10,
@@ -107,6 +109,9 @@ class FixedPointMass(PointMass):
                          viscous_damping, restitution, drawer)
 
     def move(self):
+        pass
+    
+    def restart(self):
         pass
 
 class Player(FixedPointMass):
@@ -124,6 +129,9 @@ class Player(FixedPointMass):
         
     def get_player_images(self):
         return self.player_images
+    
+    def restart(self):
+        pass
 
 # def compute_restoring_force(pos1, pos2, spring_const, natural_len):
 #     if pos1 == pos2:
@@ -216,6 +224,9 @@ class Blackhole():
         if f1 is None:
             return
         self.p1.receive_force(f1)
+        
+    def restart(self):
+        pass
     
     
 def is_point_mass(actor):
@@ -317,6 +328,8 @@ class countedCollisionResolver(CollisionResolver):
         if self.drawer is not None:
             self.drawer(surface)
 
+    def restart(self):
+        self.ncolli = 0
 
 class Boundary:
     def __init__(self, normal, point_included, world, actor_list,
@@ -352,4 +365,6 @@ class Boundary:
             p.receive_force(f)
             if self.is_floor():
                 p.receive_message({"type": "floor_hit", "y": self.point_included.y})
-                
+    
+    def restart(self):
+        pass

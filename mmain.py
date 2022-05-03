@@ -150,37 +150,42 @@ class AppMain:
         self.actor_list[:] = [a for a in self.actor_list if a.is_alive]
 
 
-    def draw(self, animation_index,player_pos, game_over):
-        self.screen.fill(pygame.Color("cyan"))
+    def draw(self, animation_index,player_pos, game_over, start):
+        self.screen.fill((255,145,123))
         self.player.move_player(animation_index, spm.PgVector((player_pos, 633)))
-            
+        
         for a in self.actor_list:
             a.draw(self.screen)
         font = pygame.font.Font(None, 90)
+        font2 = pygame.font.Font(None, 30)
         if game_over == True:
             text_img = font.render("GAME OVER", True, pygame.Color("white"))
-            text_rect = text_img.get_rect(center=(600/2, 700/2))
+            text_img2 = font2.render("Press R to restart", True, pygame.Color("white"))
+            text_rect = text_img.get_rect(center=(600/2, 450/2))
+            text_rect2 = text_img2.get_rect(center=(600/2, 550/2))
             self.screen.blit(text_img, text_rect)
-        else:
-            return None
+            self.screen.blit(text_img2, text_rect2)
+        
+        self.startscreen(start)
+        
+        pygame.display.update()
+        
+    def restart(self):
+        for a in self.actor_list:
+            a.restart()
+        
+    def startscreen(self, start):
+        if not start:
+            # self.screen.fill(pygame.Color("cyan"))
+            font = pygame.font.Font(None, 100)
+            font2 = pygame.font.Font(None, 30)
+            text_img = font.render("Press", True, pygame.Color("white"))
+            text_img2 = font2.render("SPACEBAR to START", True, pygame.Color("white"))
+            text_rect = text_img.get_rect(center=(600/2, 450/2))
+            text_rect2 = text_img2.get_rect(center=(600/2, 550/2))
+            self.screen.blit(text_img, text_rect)
+            self.screen.blit(text_img2, text_rect2)
             
-        # pygame.display.update()
-        
-    def startscreen(self):
-        font = pygame.font.Font(None, 90)
-        text_img = font.render("Press", True, pygame.Color("white"))
-        text_rect = text_img.get_rect(center=(600/2, 700/2))
-        self.screen.blit(text_img, text_rect)
-        
-        pygame.display.flip()
-        waiting = True
-        while waiting:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                if event.type == pygame.K_SPACE:
-                    waiting = False
-
     def run(self):
         clock = pygame.time.Clock()
         player_img = self.player.get_player_images()
@@ -191,20 +196,20 @@ class AppMain:
         player_move = 0
 
         should_quit = False
+        start = False
         game_over = False
-        running = True
         life = True
-        while running:
-            # if game_over:
-            #     self.startscreen()
-            #     game_over = False
-            #     self.run()
-                
+        
+        while True:
+            
+            self.startscreen(life)
             frames_per_second = 60
             clock.tick(frames_per_second)
             for i in self.actor_list:
                 if type(i) is spm.PointMass and i.pos.y > 710:
                     game_over = True
+                    self.actor_list.remove(i)
+                    print(game_over)
                 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -220,25 +225,23 @@ class AppMain:
                     #     # for k in range(1,11):
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_r and game_over:
                     print("restart")
-                    # running = False
-                    # self.actor_list.clear()
-                    self.actor_list.remove(spm.countedCollisionResolver(self.world, self.actor_list)
-)
-                    # self.actor_list.append(self.factory.create_collision_resolver())
+                    game_over = False
+                    self.restart()
                     self.run()
                     
                         
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and life:
                     self.add_connected_point_mass()
                     life = False
+                    start = True
                     
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
-                        player_move = -7
+                        player_move = -8 
                         walk = True
                             
                     elif event.key == pygame.K_d:
-                        player_move = 7
+                        player_move = 8
                         walk = True
                 elif event.type == pygame.KEYUP:
                     if event.key == pygame.K_a or event.key == pygame.K_d:
@@ -263,8 +266,8 @@ class AppMain:
             animation_index = (frame_index // animation_period % len(player_img))
 
             self.update()
-            self.draw(animation_index, player_pos, game_over)
-            pygame.display.update()
+            self.draw(animation_index, player_pos, game_over, start)
+            # pygame.display.update()
             
         pygame.quit()
 
