@@ -1,6 +1,7 @@
 import random
-from math import cos, sin, sqrt, pi
+# from math import cos, sin, sqrt, pi
 import pygame
+from pygame import mixer
 import mspringmass as spm
 
 # random obstacles
@@ -22,13 +23,13 @@ class ActorFactory:
         PURPLE = (210, 145, 255)
         RUST = (212, 198, 178)
         self.obs_list.append(spm.FixedPointMass((0,0),  self.world, 60, 0.01,
-                              1.5, spm.CircleDrawer(color = WHITE, width=0)))
+                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=5)))
         self.obs_list.append(spm.FixedPointMass((600,0),  self.world, 60, 0.01,
-                              1.5, spm.CircleDrawer(color = WHITE, width=0)))
+                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=5)))
         self.obs_list.append(spm.FixedPointMass((0,750),  self.world, 40, 0.01,
-                              1.5, spm.CircleDrawer(color = WHITE, width=0)))
+                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=5)))
         self.obs_list.append(spm.FixedPointMass((600,750),  self.world, 40, 0.01,
-                              1.5, spm.CircleDrawer(color = WHITE, width=0)))
+                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=5)))
         
         self.obs_list.append(spm.FixedPointMass((100,100),  self.world, 20, 0.01,
                               0.95, spm.CircleDrawer(color = PURPLE, width=0)))
@@ -42,7 +43,7 @@ class ActorFactory:
                               0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         
         self.obs_list.append(spm.FixedPointMass((300,220),  self.world, 50, 0.01,
-                              0.5, spm.CircleDrawer(color = RUST, width=0, glow = 150)))
+                              0.5, spm.CircleDrawer(color = RUST, width=0, glow = 3)))
         
         self.obs_list.append(spm.FixedPointMass((100,300),  self.world, 20, 0.01,
                               0.95, spm.CircleDrawer(color = PURPLE, width=0)))
@@ -98,6 +99,11 @@ class ActorFactory:
 class AppMain:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
+        pygame.mixer.music.load("../../assets/sound/bg.wav")
+        pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_volume(0.04)
+        
         width, height = 600, 750
         pygame.display.set_caption("Charlee Charlee")
         self.game_over = False
@@ -257,10 +263,10 @@ class AppMain:
                 break
                 
             player_pos += player_move
-            if player_pos <= 90:
-                    player_pos = 90
-            elif player_pos >= 510:
-                player_pos = 510
+            if player_pos <= 80:
+                    player_pos = 80
+            elif player_pos >= 520:
+                player_pos = 520
                 
             if walk == True:
                 frame_index += 1

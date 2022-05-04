@@ -19,10 +19,10 @@ class CircleDrawer:
 
     def __call__(self, screen, center, radius):
         pygame.draw.circle(screen, self.color, center, radius, self.width)
-        # if self.glow is not None:
-        #     self.color[3] = self.glow
-        #     pygame.draw.circle(surface, self.color, center, radius+10, self.width)
-        #     screen.blit(surface, (0,0))
+        if self.glow is not None:
+            # self.color[3] = self.glow
+            for i in range(self.glow):
+                pygame.draw.circle(screen, self.color, center, radius+i*10, self.glow-i)
         
 
 
@@ -326,6 +326,9 @@ class countedCollisionResolver(CollisionResolver):
                 p1.receive_force(f1)
                 p2.receive_force(-f1)
                 self.ncolli += 1
+                colli_sound = pygame.mixer.Sound("../../assets/sound/smallhit.wav")
+                colli_sound.play()
+                colli_sound.set_volume(0.05)
                 
     def draw(self, surface):
         font = pygame.font.Font(None, 60)
