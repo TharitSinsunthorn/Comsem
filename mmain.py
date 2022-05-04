@@ -19,39 +19,41 @@ class ActorFactory:
         RED = (188, 39, 50)
         GREEN = (61, 199, 112)
         WHITE = (255, 255, 255)
+        PURPLE = (210, 145, 255)
+        RUST = (212, 198, 178)
         self.obs_list.append(spm.FixedPointMass((0,0),  self.world, 60, 0.01,
                               1.5, spm.CircleDrawer(color = WHITE, width=0)))
         self.obs_list.append(spm.FixedPointMass((600,0),  self.world, 60, 0.01,
                               1.5, spm.CircleDrawer(color = WHITE, width=0)))
-        self.obs_list.append(spm.FixedPointMass((0,700),  self.world, 40, 0.01,
+        self.obs_list.append(spm.FixedPointMass((0,750),  self.world, 40, 0.01,
                               1.5, spm.CircleDrawer(color = WHITE, width=0)))
-        self.obs_list.append(spm.FixedPointMass((600,700),  self.world, 40, 0.01,
+        self.obs_list.append(spm.FixedPointMass((600,750),  self.world, 40, 0.01,
                               1.5, spm.CircleDrawer(color = WHITE, width=0)))
         
         self.obs_list.append(spm.FixedPointMass((100,100),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = RED, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         self.obs_list.append(spm.FixedPointMass((200,100),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = RED, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         self.obs_list.append(spm.FixedPointMass((300,100),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = RED, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         self.obs_list.append(spm.FixedPointMass((400,100),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = RED, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         self.obs_list.append(spm.FixedPointMass((500,100),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = RED, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         
         self.obs_list.append(spm.FixedPointMass((300,220),  self.world, 50, 0.01,
-                              0.5, spm.CircleDrawer(color = GREEN, width=0)))
+                              0.5, spm.CircleDrawer(color = RUST, width=0, glow = 150)))
         
         self.obs_list.append(spm.FixedPointMass((100,300),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = RED, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         self.obs_list.append(spm.FixedPointMass((200,400),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = RED, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         self.obs_list.append(spm.FixedPointMass((300,350),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = RED, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         self.obs_list.append(spm.FixedPointMass((400,400),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = RED, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         self.obs_list.append(spm.FixedPointMass((500,300),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = RED, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
         
         return self.obs_list
         
@@ -66,7 +68,7 @@ class ActorFactory:
         #     return spm.FixedPointMass(pos,  self.world, radius, viscous,
         #                       restitution, spm.CircleDrawer(color, width=0))
         # else:
-        color = "green"
+        color = (157, 202, 235)
         return spm.PointMass(pos, vel, self.world, radius, mass, viscous,
                              restitution, spm.CircleDrawer(color, width=0))
 
@@ -96,12 +98,13 @@ class ActorFactory:
 class AppMain:
     def __init__(self):
         pygame.init()
-        width, height = 600, 700
+        width, height = 600, 750
         pygame.display.set_caption("Charlee Charlee")
         self.game_over = False
         self.screen = pygame.display.set_mode((width, height))
+        self.surface = pygame.Surface((width, height), pygame.SRCALPHA)
 
-        self.world = spm.World((width, height), dt=1.0, gravity_acc=(0, 0.1))
+        self.world = spm.World((width, height), dt=1.0, gravity_acc=(0, 0.03))
         self.actor_list = []
         self.factory = ActorFactory(self.world, self.actor_list)
         
@@ -151,8 +154,11 @@ class AppMain:
 
 
     def draw(self, animation_index,player_pos, game_over, start):
-        self.screen.fill((255,145,123))
-        self.player.move_player(animation_index, spm.PgVector((player_pos, 633)))
+        file_path = "../../assets/bg/space4.jpg"
+        bg = pygame.image.load(file_path).convert_alpha()
+        bg = pygame.transform.scale(bg, (600, 750))
+        self.screen.blit(bg, (0, 0))
+        self.player.move_player(animation_index, spm.PgVector((player_pos, 685)))
         
         for a in self.actor_list:
             a.draw(self.screen)
@@ -206,10 +212,9 @@ class AppMain:
             frames_per_second = 60
             clock.tick(frames_per_second)
             for i in self.actor_list:
-                if type(i) is spm.PointMass and i.pos.y > 710:
+                if type(i) is spm.PointMass and i.pos.y > 760:
                     game_over = True
                     self.actor_list.remove(i)
-                    print(game_over)
                 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -224,7 +229,7 @@ class AppMain:
                     #     tip2 = (-(event.pos[0] - sling_x ), -(event.pos[1] - sling_y))
                     #     # for k in range(1,11):
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_r and game_over:
-                    print("restart")
+                    # print("restart")
                     game_over = False
                     self.restart()
                     self.run()

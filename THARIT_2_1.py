@@ -3,9 +3,10 @@ import pygame
 
 pygame.init()
 screen = pygame.display.set_mode((1000, 1000))
+
 font = pygame.font.Font(None, 100)
 text_img = font.render("TOWER TAKE A SHOWER", True, pygame.Color("cyan"))
-
+pygame.draw.circle(screen, (255,255,255), (100,100), 30)
 
     
 

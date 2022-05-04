@@ -12,12 +12,18 @@ class World:
 
 
 class CircleDrawer:
-    def __init__(self, color, width):
+    def __init__(self, color, width, glow = None):
         self.color = pygame.Color(color)
         self.width = width
+        self.glow = glow
 
     def __call__(self, screen, center, radius):
         pygame.draw.circle(screen, self.color, center, radius, self.width)
+        # if self.glow is not None:
+        #     self.color[3] = self.glow
+        #     pygame.draw.circle(surface, self.color, center, radius+10, self.width)
+        #     screen.blit(surface, (0,0))
+        
 
 
 class LineDrawer:
@@ -115,7 +121,7 @@ class FixedPointMass(PointMass):
         pass
 
 class Player(FixedPointMass):
-    def __init__(self, pos, world, file_path, width, viscous_damping=0.01, restitution=1.2):
+    def __init__(self, pos, world, file_path, width, viscous_damping=0.01, restitution=1.5):
         self.player_images = [pygame.image.load(file_path.format(k)).convert_alpha() for k in range(2, 8)]
         self.animation_index = 0
         super().__init__(pos, world, width, viscous_damping, restitution, PlayerDrawer(self.player_images))
@@ -306,6 +312,7 @@ class countedCollisionResolver(CollisionResolver):
     def __init__(self, world, actor_list, target_condition=None, drawer=None):
         super().__init__(world, actor_list, target_condition, drawer)
         self.ncolli = 0
+        self.highscore = 0
 
     def generate_force(self):
         plist = [a for a in self.actor_list if self.target_condition(a)]
@@ -322,13 +329,20 @@ class countedCollisionResolver(CollisionResolver):
                 
     def draw(self, surface):
         font = pygame.font.Font(None, 60)
-        text_image = font.render(str(self.ncolli), True, pygame.Color("white"))
-        text_rect = text_image.get_rect(center=(600/2, 30))
-        surface.blit(text_image, text_rect)
+        font2 = pygame.font.Font(None, 30)
+        text_score = font.render(str(self.ncolli), True, pygame.Color("white"))
+        text_highscore = font2.render("Highest score : " + str(self.highscore), True, pygame.Color("white"))
+        
+        text_rect = text_score.get_rect(center=(600/2, 30))
+        text_rect2 = text_highscore.get_rect(center=(600/2, 60))
+        surface.blit(text_score, text_rect)
+        surface.blit(text_highscore, text_rect2)
         if self.drawer is not None:
             self.drawer(surface)
 
     def restart(self):
+        if self.ncolli > self.highscore:
+            self.highscore = self.ncolli
         self.ncolli = 0
 
 class Boundary:
