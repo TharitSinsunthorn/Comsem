@@ -20,9 +20,13 @@ class CircleDrawer:
     def __call__(self, screen, center, radius):
         pygame.draw.circle(screen, self.color, center, radius, self.width)
         if self.glow is not None:
-            # self.color[3] = self.glow
-            for i in range(self.glow):
-                pygame.draw.circle(screen, self.color, center, radius+i*10, self.glow-i)
+            size = screen.get_size()
+            surface = pygame.Surface(size, pygame.SRCALPHA)
+            ring = self.glow[1]
+            for i in range(ring):
+                self.color[3] = int(self.glow[0]/ring)*(ring-i)
+                pygame.draw.circle(surface, self.color, center, radius+i*(ring-3), ring-i)
+            screen.blit(surface, (0,0))
         
 
 
@@ -33,8 +37,13 @@ class LineDrawer:
 
     def __call__(self, screen, pos1, pos2):
         # pygame.draw.circle(screen, self.color, pos2, (pos1-pos2).magnitude(), self.width)
+        size = screen.get_size()
+        surface = pygame.Surface(size, pygame.SRCALPHA)
+        freq = 20
         for k in range(1,10):
-            pygame.draw.circle(screen, self.color, pos2, (pos1-pos2).magnitude() - (k-1)*30, k)
+            self.color[3] = int(255/70)*(k)
+            pygame.draw.circle(surface, self.color, pos2, (pos1-pos2).magnitude() - (k-1)*freq, k)
+        screen.blit(surface, (0,0))
             # pygame.draw.circle(screen, self.color, pos1 + (pos2 - pos1)/10 * k, 1, self.width)
 
 class PlayerDrawer:
@@ -75,6 +84,9 @@ class PointMass:
 
         self.total_force = PgVector((0, 0))
         self.message_list = []
+        self.pathway = []
+        self.color = (160,216,199,100)
+
 
     def update(self):
         self.generate_force()
@@ -83,7 +95,16 @@ class PointMass:
         self.message_list.clear()
 
     def draw(self, screen):
+        size = screen.get_size()
+        surface = pygame.Surface(size, pygame.SRCALPHA)
+        tail = len(self.pathway)
+        for i in range(tail):
+            pygame.draw.circle(surface, self.color, self.pathway[i], self.radius*i/tail, 0)
+        screen.blit(surface, (0,0))
+        
         self.drawer(screen, self.pos, self.radius)
+        pygame.draw.circle(screen, pygame.Color("white"), self.pos, self.radius-4, 0)
+        
 
     def receive_force(self, force):
         self.total_force += PgVector(force)
@@ -97,6 +118,9 @@ class PointMass:
         self.receive_force(force_g + force_v)
 
     def move(self):
+        self.pathway.append(self.pos)
+        if len(self.pathway) >10:
+            del self.pathway[0]
         self.pos, self.vel = \
             integrate_symplectic(self.pos, self.vel, self.total_force, self.mass, self.world.dt)
 
@@ -113,6 +137,8 @@ class FixedPointMass(PointMass):
                  viscous_damping=0.01, restitution=0.95, drawer=None):
         super().__init__(pos, PgVector((0,0)), world, radius, 100,
                          viscous_damping, restitution, drawer)
+    def draw(self, screen):
+        self.drawer(screen, self.pos, self.radius)
 
     def move(self):
         pass
@@ -222,7 +248,7 @@ class Blackhole():
         self.generate_force()
 
     def draw(self, screen):
-        if (self.p1.pos-self.p2.pos).magnitude() <= 300:
+        if (self.p1.pos-self.p2.pos).magnitude() <= 250:
             self.drawer(screen, self.p1.pos, self.p2.pos)
 
     def generate_force(self):
@@ -278,9 +304,9 @@ class CollisionResolver:
     def update(self):
         self.generate_force()
 
-    def draw(self, surface):
+    def draw(self, screen):
         if self.drawer is not None:
-            self.drawer(surface)
+            self.drawer(screen)
             
 
     def generate_force(self):
@@ -330,7 +356,7 @@ class countedCollisionResolver(CollisionResolver):
                 colli_sound.play()
                 colli_sound.set_volume(0.05)
                 
-    def draw(self, surface):
+    def draw(self, screen):
         font = pygame.font.Font(None, 60)
         font2 = pygame.font.Font(None, 30)
         text_score = font.render(str(self.ncolli), True, pygame.Color("white"))
@@ -338,10 +364,10 @@ class countedCollisionResolver(CollisionResolver):
         
         text_rect = text_score.get_rect(center=(600/2, 30))
         text_rect2 = text_highscore.get_rect(center=(600/2, 60))
-        surface.blit(text_score, text_rect)
-        surface.blit(text_highscore, text_rect2)
+        screen.blit(text_score, text_rect)
+        screen.blit(text_highscore, text_rect2)
         if self.drawer is not None:
-            self.drawer(surface)
+            self.drawer(screen)
 
     def restart(self):
         if self.ncolli > self.highscore:
@@ -366,9 +392,9 @@ class Boundary:
     def update(self):
         self.generate_force()
 
-    def draw(self, surface):
+    def draw(self, screen):
         if self.drawer is not None:
-            self.drawer(surface)
+            self.drawer(screen)
 
     def is_floor(self):
         return self.normal == PgVector((0, 1))

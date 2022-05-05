@@ -14,47 +14,42 @@ class ActorFactory:
         self.obs_list = []
 
     def create_obstacle(self):
-        # radius = 20
-        # viscous = 0.01
-        # restitution = 0.95
         RED = (188, 39, 50)
         GREEN = (61, 199, 112)
         WHITE = (255, 255, 255)
         PURPLE = (210, 145, 255)
         RUST = (212, 198, 178)
         self.obs_list.append(spm.FixedPointMass((0,0),  self.world, 60, 0.01,
-                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=5)))
+                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=(100, 7))))
         self.obs_list.append(spm.FixedPointMass((600,0),  self.world, 60, 0.01,
-                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=5)))
+                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=(100, 7))))
         self.obs_list.append(spm.FixedPointMass((0,750),  self.world, 40, 0.01,
-                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=5)))
+                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=(100, 7))))
         self.obs_list.append(spm.FixedPointMass((600,750),  self.world, 40, 0.01,
-                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=5)))
+                              1.5, spm.CircleDrawer(color = WHITE, width=0, glow=(100, 7))))
         
-        self.obs_list.append(spm.FixedPointMass((100,100),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
-        self.obs_list.append(spm.FixedPointMass((200,100),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
-        self.obs_list.append(spm.FixedPointMass((300,100),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
-        self.obs_list.append(spm.FixedPointMass((400,100),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
-        self.obs_list.append(spm.FixedPointMass((500,100),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
+        self.obs_list.append(spm.FixedPointMass((80,130),  self.world, 20, 0.01,
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
+        self.obs_list.append(spm.FixedPointMass((200,110),  self.world, 20, 0.01,
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
+        self.obs_list.append(spm.FixedPointMass((400,110),  self.world, 20, 0.01,
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
+        self.obs_list.append(spm.FixedPointMass((520,130),  self.world, 20, 0.01,
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
         
         self.obs_list.append(spm.FixedPointMass((300,220),  self.world, 50, 0.01,
-                              0.5, spm.CircleDrawer(color = RUST, width=0, glow = 3)))
+                              0.2, spm.CircleDrawer(color = RUST, width=0, glow = (100, 7))))
         
         self.obs_list.append(spm.FixedPointMass((100,300),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
         self.obs_list.append(spm.FixedPointMass((200,400),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
         self.obs_list.append(spm.FixedPointMass((300,350),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
         self.obs_list.append(spm.FixedPointMass((400,400),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
         self.obs_list.append(spm.FixedPointMass((500,300),  self.world, 20, 0.01,
-                              0.95, spm.CircleDrawer(color = PURPLE, width=0)))
+                              0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
         
         return self.obs_list
         
@@ -69,9 +64,9 @@ class ActorFactory:
         #     return spm.FixedPointMass(pos,  self.world, radius, viscous,
         #                       restitution, spm.CircleDrawer(color, width=0))
         # else:
-        color = (157, 202, 235)
+        AQUA = (160,216,199)
         return spm.PointMass(pos, vel, self.world, radius, mass, viscous,
-                             restitution, spm.CircleDrawer(color, width=0))
+                             restitution, spm.CircleDrawer(AQUA, width=0))
 
     # def create_spring(self, p1, p2):
     #     spring_const = 0.01
@@ -79,8 +74,7 @@ class ActorFactory:
     #     return spm.Spring(p1, p2, self.world, spring_const, natural_len,
     #                       spm.LineDrawer("white", width=2))
     
-    def create_gfield(self, p1, p2):
-        G = -20
+    def create_gfield(self, p1, p2, G):
         return spm.Blackhole(p1, p2, self.world, G, spm.LineDrawer("white", width=1))
         
     def create_collision_resolver(self):
@@ -102,15 +96,14 @@ class AppMain:
         pygame.mixer.init()
         pygame.mixer.music.load("../../assets/sound/bg.wav")
         pygame.mixer.music.play(-1)
-        pygame.mixer.music.set_volume(0.04)
+        pygame.mixer.music.set_volume(0.03)
         
         width, height = 600, 750
         pygame.display.set_caption("Charlee Charlee")
         self.game_over = False
         self.screen = pygame.display.set_mode((width, height))
-        self.surface = pygame.Surface((width, height), pygame.SRCALPHA)
 
-        self.world = spm.World((width, height), dt=1.0, gravity_acc=(0, 0.03))
+        self.world = spm.World((width, height), dt=1.0, gravity_acc=(0, 0.05))
         self.actor_list = []
         self.factory = ActorFactory(self.world, self.actor_list)
         
@@ -136,16 +129,20 @@ class AppMain:
         return player
         
     def add_connected_point_mass(self):
-        p = self.factory.create_point_mass((300, 0), (random.uniform(-10, 10), random.uniform(-10, 0)))
+        p = self.factory.create_point_mass((random.uniform(100,500), 0), (random.uniform(-10, 10), random.uniform(-10, 0)))
         self.actor_list.append(p)
 
-        h1 = self.factory.create_obstacle()[9]
-        h2 = self.factory.create_obstacle()[14]
-        gf1 = self.factory.create_gfield(p, h1)
-        # gf2 = self.factory.create_gfield(p, h2)
+        h1 = self.factory.create_obstacle()[8]
+        h2 = self.factory.create_obstacle()[0]
+        h3 = self.factory.create_obstacle()[1]
+        
+        gf1 = self.factory.create_gfield(p, h1, -20)
+        gf2 = self.factory.create_gfield(p, h2, 50)
+        gf3 = self.factory.create_gfield(p, h3, 50)
         
         self.actor_list.append(gf1)
         # self.actor_list.append(gf2)
+        # self.actor_list.append(gf3)
     
         # if self.point_mass_prev is not None:
         #     sp = self.factory.create_spring(p, self.point_mass_prev)
@@ -158,6 +155,23 @@ class AppMain:
             a.update()
         self.actor_list[:] = [a for a in self.actor_list if a.is_alive]
 
+    def decorate(self):
+        planet_list = []
+        path1 = "../../assets/planet/purple1.png"
+        planet = pygame.image.load(path1).convert_alpha()
+        planet = pygame.transform.scale(planet, (80,53))
+ 
+        planet_list.append(planet.get_rect(center=(78,130)))
+        planet_list.append(planet.get_rect(center=(198,110)))
+        planet_list.append(planet.get_rect(center=(398,110)))
+        planet_list.append(planet.get_rect(center=(518,130)))
+        planet_list.append(planet.get_rect(center=(298,350)))
+        planet_list.append(planet.get_rect(center=(98,300)))
+        planet_list.append(planet.get_rect(center=(498,300)))
+        planet_list.append(planet.get_rect(center=(198,400)))
+        planet_list.append(planet.get_rect(center=(398,400)))
+        for i in range(len(planet_list)):
+            self.screen.blit(planet, planet_list[i])
 
     def draw(self, animation_index,player_pos, game_over, start):
         file_path = "../../assets/bg/space4.jpg"
@@ -168,6 +182,7 @@ class AppMain:
         
         for a in self.actor_list:
             a.draw(self.screen)
+
         font = pygame.font.Font(None, 90)
         font2 = pygame.font.Font(None, 30)
         if game_over == True:
@@ -178,6 +193,7 @@ class AppMain:
             self.screen.blit(text_img, text_rect)
             self.screen.blit(text_img2, text_rect2)
         
+        self.decorate()
         self.startscreen(start)
         
         pygame.display.update()
