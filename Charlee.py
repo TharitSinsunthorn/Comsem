@@ -78,7 +78,6 @@ class PointMass:
         self.restitution = restitution
 
         self.total_force = PgVector((0, 0))
-        self.message_list = []
         self.pathway = []
         self.color = (160,216,199,100)
 
@@ -86,7 +85,6 @@ class PointMass:
         self.generate_force()
         self.move()
         self.total_force = PgVector((0, 0))
-        self.message_list.clear()
 
     def draw(self, screen):
         size = screen.get_size()
@@ -102,9 +100,6 @@ class PointMass:
     def receive_force(self, force):
         self.total_force += PgVector(force)
 
-    def receive_message(self, msg):
-        self.message_list.append(msg)
-
     def generate_force(self):
         force_g = compute_gravity_force(self.mass, self.world.gravity_acc)
         force_v = compute_viscous_damping_force(self.viscous_damping, self.vel)
@@ -112,15 +107,10 @@ class PointMass:
 
     def move(self):
         self.pathway.append(self.pos)
-        if len(self.pathway) >10:
+        if len(self.pathway) > 10:
             del self.pathway[0]
         self.pos, self.vel = \
             integrate_symplectic(self.pos, self.vel, self.total_force, self.mass, self.world.dt)
-
-        for msg in self.message_list:
-            if msg["type"] == "floor_hit" and self.vel.y > 0:
-                # constrain y on or above floor
-                self.pos.y = msg["y"] - self.radius
 
     def restart(self):
         pass
@@ -158,7 +148,7 @@ class Player(FixedPointMass):
     def restart(self):
         pass
 
-def compute_planet_force(p1, p2, G, m1, m2):
+def compute_gravitational_force(p1, p2, G, m1, m2):
     if p1 == p2:
         return None
     vector12 = p2 - p1
@@ -167,7 +157,7 @@ def compute_planet_force(p1, p2, G, m1, m2):
     f1 = unit_vector12 * G * m1 * m2 / (distance**2)
     return f1
 
-class Planet():
+class GForce():
     def __init__(self, point_mass1, point_mass2, world, 
                  G=6.67428e-11, drawer=None):
         self.is_alive = True
@@ -189,9 +179,7 @@ class Planet():
             self.drawer(screen, self.p1.pos, self.p2.pos)
 
     def generate_force(self):
-        f1 = compute_planet_force(self.p1.pos, self.p2.pos, self.G, self.p1.mass, self.p2.mass)
-        if f1 is None:
-            return
+        f1 = compute_gravitational_force(self.p1.pos, self.p2.pos, self.G, self.p1.mass, self.p2.mass)
         self.p1.receive_force(f1)
         
     def restart(self):
@@ -274,6 +262,8 @@ class countedCollisionResolver(CollisionResolver):
         super().__init__(world, actor_list, target_condition, drawer)
         self.ncolli = 0
         self.highscore = 0
+        self.achieve = False
+        
 
     def generate_force(self):
         plist = [a for a in self.actor_list if self.target_condition(a)]
@@ -287,6 +277,15 @@ class countedCollisionResolver(CollisionResolver):
                 p1.receive_force(f1)
                 p2.receive_force(-f1)
                 self.ncolli += 1
+                
+                while not self.achieve:
+                    if self.ncolli > self.highscore and self.highscore != 0:
+                        highscore_sound = pygame.mixer.Sound("../../assets/sound/yippy.wav")
+                        highscore_sound.play()
+                        highscore_sound.set_volume(0.05)
+                        self.achieve = True
+                    break
+                    
                 colli_sound = pygame.mixer.Sound("../../assets/sound/smallhit.wav")
                 colli_sound.play()
                 colli_sound.set_volume(0.05)
@@ -295,7 +294,7 @@ class countedCollisionResolver(CollisionResolver):
         font = pygame.font.Font(None, 60)
         font2 = pygame.font.Font(None, 30)
         text_score = font.render(str(self.ncolli), True, pygame.Color("white"))
-        text_highscore = font2.render("Highest score : " + str(self.highscore), True, pygame.Color("white"))
+        text_highscore = font2.render("High score : " + str(self.highscore), True, pygame.Color("white"))
         
         text_rect = text_score.get_rect(center=(600/2, 30))
         text_rect2 = text_highscore.get_rect(center=(600/2, 60))
@@ -307,6 +306,7 @@ class countedCollisionResolver(CollisionResolver):
     def restart(self):
         if self.ncolli > self.highscore:
             self.highscore = self.ncolli
+        self.achieve = False
         self.ncolli = 0
 
 
@@ -332,9 +332,6 @@ class Boundary:
         if self.drawer is not None:
             self.drawer(screen)
 
-    def is_floor(self):
-        return self.normal == PgVector((0, 1))
-
     def generate_force(self):
         plist = [a for a in self.actor_list if self.target_condition(a)]
         for p in plist:
@@ -342,8 +339,9 @@ class Boundary:
             if f is None:
                 continue
             p.receive_force(f)
-            if self.is_floor():
-                p.receive_message({"type": "floor_hit", "y": self.point_included.y})
+            colli_sound = pygame.mixer.Sound("../../assets/sound/boing.wav")
+            colli_sound.play()
+            colli_sound.set_volume(0.01)
     
     def restart(self):
         pass
