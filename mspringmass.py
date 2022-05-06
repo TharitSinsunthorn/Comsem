@@ -1,6 +1,4 @@
 import pygame
-
-
 PgVector = pygame.math.Vector2
 
 
@@ -10,7 +8,7 @@ class World:
         self.dt = dt
         self.gravity_acc = PgVector(gravity_acc)
 
-
+### Drawer section ###
 class CircleDrawer:
     def __init__(self, color, width, glow = None):
         self.color = pygame.Color(color)
@@ -19,6 +17,8 @@ class CircleDrawer:
 
     def __call__(self, screen, center, radius):
         pygame.draw.circle(screen, self.color, center, radius, self.width)
+        
+        # For glowing object
         if self.glow is not None:
             size = screen.get_size()
             surface = pygame.Surface(size, pygame.SRCALPHA)
@@ -29,14 +29,12 @@ class CircleDrawer:
             screen.blit(surface, (0,0))
         
 
-
 class LineDrawer:
     def __init__(self, color, width):
         self.color = pygame.Color(color)
         self.width = width
 
     def __call__(self, screen, pos1, pos2):
-        # pygame.draw.circle(screen, self.color, pos2, (pos1-pos2).magnitude(), self.width)
         size = screen.get_size()
         surface = pygame.Surface(size, pygame.SRCALPHA)
         freq = 20
@@ -44,7 +42,7 @@ class LineDrawer:
             self.color[3] = int(255/70)*(k)
             pygame.draw.circle(surface, self.color, pos2, (pos1-pos2).magnitude() - (k-1)*freq, k)
         screen.blit(surface, (0,0))
-            # pygame.draw.circle(screen, self.color, pos1 + (pos2 - pos1)/10 * k, 1, self.width)
+            
 
 class PlayerDrawer:
     def __init__(self, player_images):
@@ -53,21 +51,18 @@ class PlayerDrawer:
     def __call__(self, screen, pos_x, pos_y, animation_index):
         screen.blit(self.player_images[animation_index], (pos_x, pos_y))
 
-
 def compute_gravity_force(mass, gravity_acc):
     return mass * gravity_acc
 
-
 def compute_viscous_damping_force(viscous_damping, vel):
     return -viscous_damping * vel
-
 
 def integrate_symplectic(pos, vel, force, mass, dt):
     vel_new = vel + force / mass * dt
     pos_new = pos + vel_new * dt
     return pos_new, vel_new
 
-
+### Object section ###
 class PointMass:
     def __init__(self, pos, vel, world, radius=10, mass=10,
                  viscous_damping=0.01, restitution=0.95, drawer=None):
@@ -87,7 +82,6 @@ class PointMass:
         self.pathway = []
         self.color = (160,216,199,100)
 
-
     def update(self):
         self.generate_force()
         self.move()
@@ -98,13 +92,12 @@ class PointMass:
         size = screen.get_size()
         surface = pygame.Surface(size, pygame.SRCALPHA)
         tail = len(self.pathway)
-        for i in range(tail):
-            pygame.draw.circle(surface, self.color, self.pathway[i], self.radius*i/tail, 0)
+        for n in range(tail):
+            pygame.draw.circle(surface, self.color, self.pathway[n], self.radius*n/tail, 0)
         screen.blit(surface, (0,0))
         
         self.drawer(screen, self.pos, self.radius)
         pygame.draw.circle(screen, pygame.Color("white"), self.pos, self.radius-4, 0)
-        
 
     def receive_force(self, force):
         self.total_force += PgVector(force)
@@ -165,63 +158,7 @@ class Player(FixedPointMass):
     def restart(self):
         pass
 
-# def compute_restoring_force(pos1, pos2, spring_const, natural_len):
-#     if pos1 == pos2:
-#         return None
-#     vector12 = pos2 - pos1
-#     distance = vector12.magnitude()
-#     unit_vector12 = vector12 / distance
-#     f1 = unit_vector12 * spring_const * (distance - natural_len)
-#     return f1
-
-
-# class Spring:
-#     def __init__(self, point_mass1, point_mass2, world,
-#                  spring_const=0.01, natural_len=0, drawer=None):
-#         self.is_alive = True
-#         self.world = world
-#         self.drawer = drawer
-
-#         self.p1 = point_mass1
-#         self.p2 = point_mass2
-#         self.spring_const = spring_const
-#         self.natural_len = natural_len
-
-#     def update(self):
-#         if not (self.p1.is_alive and self.p2.is_alive):
-#             self.is_alive = False
-#             return
-#         self.generate_force()
-
-#     def draw(self, screen):
-#         self.drawer(screen, self.p1.pos, self.p2.pos)
-
-#     def generate_force(self):
-#         f1 = compute_restoring_force(self.p1.pos, self.p2.pos, self.spring_const, self.natural_len)
-#         if f1 is None:
-#             return
-#         self.p1.receive_force(f1)
-#         self.p2.receive_force(-f1)
-
-
-# class FragileSpring(Spring):
-#     def __init__(self, point_mass1, point_mass2, world,
-#                  spring_const=0.01, natural_len=0, drawer=None,
-#                  break_threshold=1e9):
-#         super().__init__(point_mass1, point_mass2, world, spring_const,
-#                          natural_len, drawer)
-#         self.break_threshold = break_threshold
-
-#     def generate_force(self):
-#         f1 = compute_restoring_force(self.p1.pos, self.p2.pos, self.spring_const, self.natural_len)
-#         if f1 is None:
-#             return
-#         self.p1.receive_force(f1)
-#         self.p2.receive_force(-f1)
-#         if f1.magnitude() > self.break_threshold:
-#             self.is_alive = False
-
-def compute_hole_force(p1, p2, G, m1, m2):
+def compute_planet_force(p1, p2, G, m1, m2):
     if p1 == p2:
         return None
     vector12 = p2 - p1
@@ -230,7 +167,7 @@ def compute_hole_force(p1, p2, G, m1, m2):
     f1 = unit_vector12 * G * m1 * m2 / (distance**2)
     return f1
 
-class Blackhole():
+class Planet():
     def __init__(self, point_mass1, point_mass2, world, 
                  G=6.67428e-11, drawer=None):
         self.is_alive = True
@@ -252,7 +189,7 @@ class Blackhole():
             self.drawer(screen, self.p1.pos, self.p2.pos)
 
     def generate_force(self):
-        f1 = compute_hole_force(self.p1.pos, self.p2.pos, self.G, self.p1.mass, self.p2.mass)
+        f1 = compute_planet_force(self.p1.pos, self.p2.pos, self.G, self.p1.mass, self.p2.mass)
         if f1 is None:
             return
         self.p1.receive_force(f1)
@@ -263,7 +200,6 @@ class Blackhole():
     
 def is_point_mass(actor):
     return isinstance(actor, PointMass)
-
 
 def compute_impact_force_between_points(p1, p2, dt):
     if isinstance(p1, Player) :
@@ -308,7 +244,6 @@ class CollisionResolver:
         if self.drawer is not None:
             self.drawer(screen)
             
-
     def generate_force(self):
         plist = [a for a in self.actor_list if self.target_condition(a)]
         n = len(plist)
@@ -373,6 +308,7 @@ class countedCollisionResolver(CollisionResolver):
         if self.ncolli > self.highscore:
             self.highscore = self.ncolli
         self.ncolli = 0
+
 
 class Boundary:
     def __init__(self, normal, point_included, world, actor_list,

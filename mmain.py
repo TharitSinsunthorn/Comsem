@@ -1,11 +1,7 @@
 import random
-# from math import cos, sin, sqrt, pi
 import pygame
 from pygame import mixer
 import mspringmass as spm
-
-# random obstacles
-# orbit obs
 
 class ActorFactory:
     def __init__(self, world, actor_list):
@@ -14,11 +10,13 @@ class ActorFactory:
         self.obs_list = []
 
     def create_obstacle(self):
-        RED = (188, 39, 50)
-        GREEN = (61, 199, 112)
+        # RED = (188, 39, 50)
+        # GREEN = (61, 199, 112)
         WHITE = (255, 255, 255)
         PURPLE = (210, 145, 255)
         RUST = (212, 198, 178)
+        
+        # White star at corner
         self.obs_list.append(spm.FixedPointMass((0,0),  self.world, 60, 0.01,
                               1.5, spm.CircleDrawer(color = WHITE, width=0, glow=(100, 7))))
         self.obs_list.append(spm.FixedPointMass((600,0),  self.world, 60, 0.01,
@@ -28,6 +26,7 @@ class ActorFactory:
         self.obs_list.append(spm.FixedPointMass((600,750),  self.world, 40, 0.01,
                               1.5, spm.CircleDrawer(color = WHITE, width=0, glow=(100, 7))))
         
+        # Purple planet
         self.obs_list.append(spm.FixedPointMass((80,130),  self.world, 20, 0.01,
                               0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
         self.obs_list.append(spm.FixedPointMass((200,110),  self.world, 20, 0.01,
@@ -36,10 +35,6 @@ class ActorFactory:
                               0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
         self.obs_list.append(spm.FixedPointMass((520,130),  self.world, 20, 0.01,
                               0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
-        
-        self.obs_list.append(spm.FixedPointMass((300,220),  self.world, 50, 0.01,
-                              0.2, spm.CircleDrawer(color = RUST, width=0, glow = (100, 7))))
-        
         self.obs_list.append(spm.FixedPointMass((100,300),  self.world, 20, 0.01,
                               0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
         self.obs_list.append(spm.FixedPointMass((200,400),  self.world, 20, 0.01,
@@ -51,34 +46,26 @@ class ActorFactory:
         self.obs_list.append(spm.FixedPointMass((500,300),  self.world, 20, 0.01,
                               0.95, spm.CircleDrawer(color = PURPLE, width=0, glow=(100, 6))))
         
+        # Sun
+        self.obs_list.append(spm.FixedPointMass((300,220),  self.world, 50, 0.01,
+                              0.2, spm.CircleDrawer(color = RUST, width=0, glow = (100, 7))))
+        
         return self.obs_list
         
     def create_point_mass(self, pos, vel):
-        # vel = (random.uniform(-10, 10), random.uniform(-10, 0))
         mass = 10
         radius = 10
         viscous = 0.01
         restitution = 1.05
-        # if fixed:
-        #     color = "gray"
-        #     return spm.FixedPointMass(pos,  self.world, radius, viscous,
-        #                       restitution, spm.CircleDrawer(color, width=0))
-        # else:
         AQUA = (160,216,199)
         return spm.PointMass(pos, vel, self.world, radius, mass, viscous,
                              restitution, spm.CircleDrawer(AQUA, width=0))
-
-    # def create_spring(self, p1, p2):
-    #     spring_const = 0.01
-    #     natural_len = 20
-    #     return spm.Spring(p1, p2, self.world, spring_const, natural_len,
-    #                       spm.LineDrawer("white", width=2))
     
-    def create_gfield(self, p1, p2, G):
-        return spm.Blackhole(p1, p2, self.world, G, spm.LineDrawer("white", width=1))
-        
     def create_collision_resolver(self):
         return spm.countedCollisionResolver(self.world, self.actor_list)
+    
+    def create_gfield(self, p1, p2, G):
+        return spm.Planet(p1, p2, self.world, G, spm.LineDrawer("white", width=1))
 
     def create_boundary(self, name):
         width, height = self.world.size
@@ -99,56 +86,43 @@ class AppMain:
         pygame.mixer.music.set_volume(0.03)
         
         width, height = 600, 750
-        pygame.display.set_caption("Charlee Charlee")
-        self.game_over = False
         self.screen = pygame.display.set_mode((width, height))
-
+        pygame.display.set_caption("Charlee Charlee")
+        
+        #Build world
         self.world = spm.World((width, height), dt=1.0, gravity_acc=(0, 0.05))
         self.actor_list = []
         self.factory = ActorFactory(self.world, self.actor_list)
         
+        # Build obstacles
         for i in range(len(self.factory.create_obstacle())):
             self.actor_list.append(self.factory.create_obstacle()[i])
 
+        # Build boundary
         self.actor_list.append(self.factory.create_collision_resolver())
         self.actor_list.append(self.factory.create_boundary("top"))
-        # self.actor_list.append(self.factory.create_boundary("bottom"))
         self.actor_list.append(self.factory.create_boundary("left"))
         self.actor_list.append(self.factory.create_boundary("right"))
         
-        
-        self.point_mass_prev = None
-        
+        #Build player
         self.player_images = []
         self.player = self.create_player()
 
     def create_player(self):
         file_path = "../../assets/player/p1_walk{:02}.png"
-        player = spm.Player(spm.PgVector(250,500), self.world, file_path, 42)
+        player = spm.Player((0,0), self.world, file_path, 42)
         self.actor_list.append(player)
         return player
         
-    def add_connected_point_mass(self):
-        p = self.factory.create_point_mass((random.uniform(100,500), 0), (random.uniform(-10, 10), random.uniform(-10, 0)))
+    def add_gravitational_point_mass(self):
+        # Add moving point mass
+        p = self.factory.create_point_mass((random.uniform(100,500), 0), (random.uniform(-10, 10), random.uniform(-10, -5)))
         self.actor_list.append(p)
 
-        h1 = self.factory.create_obstacle()[8]
-        h2 = self.factory.create_obstacle()[0]
-        h3 = self.factory.create_obstacle()[1]
-        
-        gf1 = self.factory.create_gfield(p, h1, -20)
-        gf2 = self.factory.create_gfield(p, h2, 50)
-        gf3 = self.factory.create_gfield(p, h3, 50)
-        
+        # Determine center of gravitational force
+        s1 = self.factory.create_obstacle()[-1]
+        gf1 = self.factory.create_gfield(p, s1, -20)
         self.actor_list.append(gf1)
-        # self.actor_list.append(gf2)
-        # self.actor_list.append(gf3)
-    
-        # if self.point_mass_prev is not None:
-        #     sp = self.factory.create_spring(p, self.point_mass_prev)
-        #     self.actor_list.append(sp)
-        # if pygame.key.get_pressed()[pygame.K_SPACE]:
-        #     self.point_mass_prev = p
 
     def update(self):
         for a in self.actor_list:
@@ -172,14 +146,17 @@ class AppMain:
         planet_list.append(planet.get_rect(center=(398,400)))
         for i in range(len(planet_list)):
             self.screen.blit(planet, planet_list[i])
-
-    def draw(self, animation_index,player_pos, game_over, start):
+    
+    def background(self):
         file_path = "../../assets/bg/space4.jpg"
         bg = pygame.image.load(file_path).convert_alpha()
         bg = pygame.transform.scale(bg, (600, 750))
         self.screen.blit(bg, (0, 0))
-        self.player.move_player(animation_index, spm.PgVector((player_pos, 685)))
+
+    def draw(self, animation_index,player_pos, game_over, start):
+        self.background()
         
+        self.player.move_player(animation_index, spm.PgVector((player_pos, 683)))
         for a in self.actor_list:
             a.draw(self.screen)
 
@@ -188,8 +165,10 @@ class AppMain:
         if game_over == True:
             text_img = font.render("GAME OVER", True, pygame.Color("white"))
             text_img2 = font2.render("Press R to restart", True, pygame.Color("white"))
+            
             text_rect = text_img.get_rect(center=(600/2, 450/2))
             text_rect2 = text_img2.get_rect(center=(600/2, 550/2))
+            
             self.screen.blit(text_img, text_rect)
             self.screen.blit(text_img2, text_rect2)
         
@@ -204,61 +183,63 @@ class AppMain:
         
     def startscreen(self, start):
         if not start:
-            # self.screen.fill(pygame.Color("cyan"))
             font = pygame.font.Font(None, 100)
             font2 = pygame.font.Font(None, 30)
+            font3 = pygame.font.Font(None, 20)
+            
             text_img = font.render("Press", True, pygame.Color("white"))
             text_img2 = font2.render("SPACEBAR to START", True, pygame.Color("white"))
+            text_img3 = font3.render("use A&D to move Charlee", True, pygame.Color("white"))
+            
             text_rect = text_img.get_rect(center=(600/2, 450/2))
             text_rect2 = text_img2.get_rect(center=(600/2, 550/2))
+            text_rect3 = text_img3.get_rect(center=(600/2, 600/2))
+            
             self.screen.blit(text_img, text_rect)
             self.screen.blit(text_img2, text_rect2)
+            self.screen.blit(text_img3, text_rect3)
+            
             
     def run(self):
         clock = pygame.time.Clock()
-        player_img = self.player.get_player_images()
+        should_quit = False
         
+        player_img = self.player.get_player_images()
         frame_index = 0
         player_pos = 300
         walk = False
         player_move = 0
-
-        should_quit = False
+    
         start = False
         game_over = False
         life = True
         
         while True:
-            
             self.startscreen(life)
             frames_per_second = 60
             clock.tick(frames_per_second)
-            for i in self.actor_list:
-                if type(i) is spm.PointMass and i.pos.y > 760:
+            for a in self.actor_list:
+                if type(a) is spm.PointMass and a.pos.y > 760:
+                    gameover_sound = pygame.mixer.Sound("../../assets/sound/gameover.wav")
+                    gameover_sound.play()
+                    gameover_sound.set_volume(0.05)
                     game_over = True
-                    self.actor_list.remove(i)
+                    self.actor_list.remove(a)
                 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     should_quit = True
+                    
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     should_quit = True
-                    # elif event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-                    #     self.point_mass_prev = None
-                    # elif event.type == pygame.MOUSEBUTTONDOWN:
-                    #     sling_x, sling_y = event.pos
-                    #     tip1 = (player_pos, 550)
-                    #     tip2 = (-(event.pos[0] - sling_x ), -(event.pos[1] - sling_y))
-                    #     # for k in range(1,11):
+                    
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_r and game_over:
-                    # print("restart")
                     game_over = False
                     self.restart()
                     self.run()
                     
-                        
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and life:
-                    self.add_connected_point_mass()
+                    self.add_gravitational_point_mass()
                     life = False
                     start = True
                     
@@ -266,15 +247,18 @@ class AppMain:
                     if event.key == pygame.K_a:
                         player_move = -8 
                         walk = True
-                            
                     elif event.key == pygame.K_d:
                         player_move = 8
                         walk = True
-                elif event.type == pygame.KEYUP:
-                    if event.key == pygame.K_a or event.key == pygame.K_d:
+                    elif event.key == pygame.K_a and pygame.K_d:
                         player_move = 0
                         walk = False
-                            
+                        
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_a or pygame.K_d:
+                        player_move = 0
+                        walk = False
+                        
             if should_quit:
                 break
                 
@@ -289,27 +273,14 @@ class AppMain:
             else:
                 frame_index = 0
                 
-            animation_period = 3 #This come from trial and error
+            animation_period = 1
             animation_index = (frame_index // animation_period % len(player_img))
 
             self.update()
             self.draw(animation_index, player_pos, game_over, start)
-            # pygame.display.update()
             
         pygame.quit()
 
 
-
 if __name__ == "__main__":
     AppMain().run()
-    
-# play_again = 1
-
-# while play_again:
-#     # play_again = int(input("Play again? 0=No, 1=Yes"))
-#     if play_again:
-#         if __name__ == "__main__":
-#             AppMain().run()
-#     else:
-#         break
-#         pygame.quit()
