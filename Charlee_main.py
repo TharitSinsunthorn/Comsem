@@ -60,6 +60,10 @@ class ActorFactory:
         return chr.PointMass(pos, vel, self.world, radius, mass, viscous,
                              restitution, chr.CircleDrawer(AQUA, width=0))
     
+    def create_player(self):
+        file_path = "../../assets/player/p1_walk{:02}.png"
+        return chr.Player((0,0), self.world, file_path, 42)
+    
     def create_collision_resolver(self):
         return chr.countedCollisionResolver(self.world, self.actor_list)
     
@@ -105,13 +109,8 @@ class AppMain:
         
         #Build player
         self.player_images = []
-        self.player = self.create_player()
-
-    def create_player(self):
-        file_path = "../../assets/player/p1_walk{:02}.png"
-        player = chr.Player((0,0), self.world, file_path, 42)
-        self.actor_list.append(player)
-        return player
+        self.player = self.factory.create_player()
+        self.actor_list.append(self.player)
         
     def add_gravitational_point_mass(self):
         # Add moving point mass
