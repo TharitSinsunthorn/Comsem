@@ -1,12 +1,12 @@
 import pygame
 PgVector = pygame.math.Vector2
 
-
 class World:
     def __init__(self, size, dt, gravity_acc):
         self.size = size
         self.dt = dt
         self.gravity_acc = PgVector(gravity_acc)
+
 
 ### Drawer section ###
 class CircleDrawer:
@@ -85,15 +85,17 @@ class PointMass:
         self.generate_force()
         self.move()
         self.total_force = PgVector((0, 0))
-
-    def draw(self, screen):
+        
+    def comet(self, screen, pathway):
         size = screen.get_size()
         surface = pygame.Surface(size, pygame.SRCALPHA)
         tail = len(self.pathway)
         for n in range(tail):
-            pygame.draw.circle(surface, self.color, self.pathway[n], self.radius*n/tail, 0)
+            pygame.draw.circle(surface, self.color, pathway[n], self.radius*n/tail, 0)
         screen.blit(surface, (0,0))
-        
+
+    def draw(self, screen):
+        self.comet(screen, self.pathway)
         self.drawer(screen, self.pos, self.radius)
         pygame.draw.circle(screen, pygame.Color("white"), self.pos, self.radius-4, 0)
 
@@ -157,7 +159,7 @@ def compute_gravitational_force(p1, p2, G, m1, m2):
     f1 = unit_vector12 * G * m1 * m2 / (distance**2)
     return f1
 
-class GForce():
+class GravitationalForce():
     def __init__(self, point_mass1, point_mass2, world, 
                  G=6.67428e-11, drawer=None):
         self.is_alive = True
@@ -213,7 +215,7 @@ def compute_impact_force_between_points(p1, p2, dt):
     return f1
 
 
-class CollisionResolver:
+class countedCollisionResolver:
     def __init__(self, world, actor_list, target_condition=None, drawer=None):
         self.is_alive = True
         self.world = world
@@ -224,46 +226,13 @@ class CollisionResolver:
             self.target_condition = is_point_mass
         else:
             self.target_condition = target_condition
-
-    def update(self):
-        self.generate_force()
-
-    def draw(self, screen):
-        if self.drawer is not None:
-            self.drawer(screen)
             
-    def generate_force(self):
-        plist = [a for a in self.actor_list if self.target_condition(a)]
-        n = len(plist)
-        for i in range(n):
-            for j in range(i + 1, n):
-                p1, p2 = plist[i], plist[j]
-                f1 = compute_impact_force_between_points(p1, p2, self.world.dt)
-                if f1 is None:
-                    continue
-                p1.receive_force(f1)
-                p2.receive_force(-f1)
-
-
-def compute_impact_force_by_fixture(p, normal, point_included, dt):
-    invasion = normal.dot(p.pos - point_included)
-    if invasion + p.radius > 0 and normal.dot(p.vel) > 0:
-        e = p.restitution
-        v = normal.dot(p.vel)
-        m = p.mass
-        f = normal * (-(e + 1) * v) * m / dt
-    else:
-        f = None
-    return f
-
-
-class countedCollisionResolver(CollisionResolver):
-    def __init__(self, world, actor_list, target_condition=None, drawer=None):
-        super().__init__(world, actor_list, target_condition, drawer)
         self.ncolli = 0
         self.highscore = 0
         self.achieve = False
-        
+
+    def update(self):
+        self.generate_force()
 
     def generate_force(self):
         plist = [a for a in self.actor_list if self.target_condition(a)]
@@ -309,6 +278,17 @@ class countedCollisionResolver(CollisionResolver):
         self.achieve = False
         self.ncolli = 0
 
+
+def compute_impact_force_by_fixture(p, normal, point_included, dt):
+    invasion = normal.dot(p.pos - point_included)
+    if invasion + p.radius > 0 and normal.dot(p.vel) > 0:
+        e = p.restitution
+        v = normal.dot(p.vel)
+        m = p.mass
+        f = normal * (-(e + 1) * v) * m / dt
+    else:
+        f = None
+    return f
 
 class Boundary:
     def __init__(self, normal, point_included, world, actor_list,

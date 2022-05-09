@@ -68,7 +68,7 @@ class ActorFactory:
         return chr.countedCollisionResolver(self.world, self.actor_list)
     
     def create_gfield(self, p1, p2, G):
-        return chr.GForce(p1, p2, self.world, G, chr.LineDrawer("white", width=1))
+        return chr.GravitationalForce(p1, p2, self.world, G, chr.LineDrawer("white", width=1))
 
     def create_boundary(self, name):
         width, height = self.world.size
@@ -93,7 +93,7 @@ class AppMain:
         pygame.display.set_caption("Charlee Charlee")
         
         #Build world
-        self.world = chr.World((width, height), dt=1.0, gravity_acc=(0, 0.05))
+        self.world = chr.World((width, height), dt=1.0, gravity_acc=(0, 0.09))
         self.actor_list = []
         self.factory = ActorFactory(self.world, self.actor_list)
         
@@ -218,19 +218,19 @@ class AppMain:
         game_over = False
         life = True
         
+        gameover_sound = pygame.mixer.Sound("../../assets/sound/gameover.wav")
+        sad = pygame.mixer.Sound("../../assets/sound/sadchild.wav")
+        
         while True:
             self.startscreen(life)
             frames_per_second = 60
             clock.tick(frames_per_second)
             for a in self.actor_list:
                 if type(a) is chr.PointMass and a.pos.y > 760:
-                    gameover_sound = pygame.mixer.Sound("../../assets/sound/gameover.wav")
-                    sad = pygame.mixer.Sound("../../assets/sound/sadchild.wav")
-                    
                     gameover_sound.play()
-                    sad.play()
-                    
                     gameover_sound.set_volume(0.05)
+                        
+                    sad.play()
                     sad.set_volume(0.04)
                     
                     game_over = True
@@ -257,9 +257,11 @@ class AppMain:
                     if event.key == pygame.K_a:
                         player_move = -8 
                         walk = True
+    
                     elif event.key == pygame.K_d:
                         player_move = 8
                         walk = True
+                        
                     elif event.key == pygame.K_a and pygame.K_d:
                         player_move = 0
                         walk = False
@@ -282,6 +284,7 @@ class AppMain:
                 frame_index += 1
             else:
                 frame_index = 0
+                
                 
             animation_period = 1
             animation_index = (frame_index // animation_period % len(player_img))
